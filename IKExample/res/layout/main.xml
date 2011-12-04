@@ -4,16 +4,63 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <TextView
+    <LinearLayout
+        android:id="@+id/quantityLayout"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/hello" />
+        android:layout_height="wrap_content" >
 
-    <TextView
-        android:id="@+id/textView1"
+        <TextView
+            android:id="@+id/TextView02"
+            android:layout_width="300px"
+            android:layout_height="wrap_content"
+            android:text="@string/quantity"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <Button
+            android:id="@+id/quantityMinus"
+            android:layout_width="50px"
+            android:layout_height="wrap_content"
+            android:text="-" />
+
+        <TextView
+            android:id="@+id/quantity"
+            android:layout_width="75px"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <Button
+            android:id="@+id/quantityPlus"
+            android:layout_width="50px"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="0px"
+            android:text="+" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/activationLayout"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Large Text"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/purchasedLabel"
+            android:layout_width="300px"
+            android:layout_height="wrap_content"
+            android:text="@string/purchased"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <CheckBox
+            android:id="@+id/productActivation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="" android:clickable="false"/>
+
+        <Button
+            android:id="@+id/buyButton"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Buy Now"/>
+
+    </LinearLayout>
 
 </LinearLayout>

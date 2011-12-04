@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="hello">Hello World, IKActivity!</string>
-    <string name="app_name">InventoryKit</string>
+    <string name="app_name">IKExample</string>
+    <string name="quantity">Quantity</string>
+    <string name="purchased">Product Activated</string>
+    <string name="productActivated">Purchased</string>
 
 </resources>
