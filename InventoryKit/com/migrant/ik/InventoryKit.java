@@ -4,16 +4,11 @@
  */
 package com.migrant.ik;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.Date;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Set;
-
 import android.app.Activity;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 import static android.content.Context.MODE_PRIVATE;
@@ -23,9 +18,37 @@ public class InventoryKit {
 	private static final Hashtable<String,Date> sActivatedProducts = new Hashtable<String,Date>();
 	private static final Hashtable<String,Integer> sConsumableProducts = new Hashtable<String,Integer>();
 	private static SharedPreferences sPreferences;
+	private static ApiClient sClient = null;
 
 	public static final void registerWithPaymentQueue(Activity activity) {
 		loadSettings(activity);
+	}
+	
+	public static final void setApiClient(ApiClient client) {
+		sClient = client;
+	}
+	
+	public static final void setCustomerEmail(final String aEmail) {
+		if( sClient!=null ) {
+			sClient.findOrCreateCustomerByEmail(aEmail, new CustomerListener() {
+
+				@Override
+				public void customerFound(Customer customer) {
+					Log.d("InventoryKit", "Customer found");
+				}
+
+				@Override
+				public void customerCreated(Customer customer) {
+					Log.d("InventoryKit", "Customer created");
+				}
+
+				@Override
+				public void customerError() {
+					Log.e("InventoryKit", "Customer error");
+				}
+				
+			});
+		}
 	}
 	
 	public static final void loadSettings(Activity activity) {

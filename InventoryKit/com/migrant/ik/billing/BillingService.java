@@ -20,9 +20,6 @@ public class BillingService extends Service implements ServiceConnection {
 	private Context mContext;
 	private IMarketBillingService mService;
 	private static final String TAG = "BillingService";
-	private static final String BILLING_REQUEST = "BillingRequest";
-	private static final String API_VERSION = "ApiVersion";
-	private static final String PACKAGE_NAME = "PackageName";
 	  
 	@Override
 	public void onCreate() {
@@ -45,13 +42,13 @@ public class BillingService extends Service implements ServiceConnection {
 		return null;
 	}
 
-	protected Bundle makeRequestBundle(String method) {
-		  Bundle request = new Bundle();
-		  request.putString(BILLING_REQUEST, method);
-		  request.putInt(API_VERSION, 1);
-		  request.putString(PACKAGE_NAME, getPackageName());
-		  return request;
-	}
+//	protected Bundle makeRequestBundle(String method) {
+//		  Bundle request = new Bundle();
+//		  request.putString(BILLING_REQUEST, method);
+//		  request.putInt(API_VERSION, 1);
+//		  request.putString(PACKAGE_NAME, getPackageName());
+//		  return request;
+//	}
 	
 	/**
 	  * The Android system calls this when we are connected to the MarketBillingService.
