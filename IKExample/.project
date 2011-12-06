@@ -36,5 +36,10 @@
 			<type>2</type>
 			<location>/Users/aubrey/Desktop/code/inventory-kit-android/InventoryKit</location>
 		</link>
+		<link>
+			<name>jackson-src</name>
+			<type>2</type>
+			<location>/Users/aubrey/Desktop/code/inventory-kit-android/jackson/src</location>
+		</link>
 	</linkedResources>
 </projectDescription>

@@ -5,21 +5,29 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import static android.view.View.*;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import com.migrant.enrollmint.client.Client;
 import com.migrant.ik.InventoryKit;
 
 public class IKActivity extends Activity {
-	
+
 	private static final String MY_CONSUMABLE = "your.consumable.key";
 	private static final String MY_NON_CONSUMABLE = "your.nonconsumable.key";
-	
+
 	private int quantityAvailable = 0;
 	private boolean productActivated = false;
+
+	private Button quantityMinusButton;
+	private Button quantityPlusButton;
+	private TextView quantityText;
+	private CheckBox activationCheckBox;
+	private Button activateProductButton;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -29,83 +37,128 @@ public class IKActivity extends Activity {
 
 		// setup inventory-kit
 		InventoryKit.registerWithPaymentQueue(this);
-		
+		InventoryKit.setApiClient(new Client("07f54d1b88", "com.gazellelab"));
+		InventoryKit.setCustomerEmail("test@test.com",
+				new InventoryKit.DefaultCustomerListener() {
+
+					@Override
+					public void customerError() {
+						Log.e("IKExample", "Customer error");
+						showAlert("Unable to load customer data","OK",new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+							}
+							
+							
+						},"Retry",new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+							}
+							
+						});
+					}
+
+				});
+
 		// quantity components
-		Button tPlusButton = (Button) findViewById(R.id.quantityPlus);
-		Button tMinusButton = (Button) findViewById(R.id.quantityMinus);
-		final TextView tQuantityValue = (TextView) findViewById(R.id.quantity);
+		this.quantityPlusButton = (Button) findViewById(R.id.quantityPlus);
+		this.quantityMinusButton = (Button) findViewById(R.id.quantityMinus);
+		this.quantityText = (TextView) findViewById(R.id.quantity);
 
 		quantityAvailable = InventoryKit.quantityAvailable(MY_CONSUMABLE);
-		tQuantityValue.setText(new Integer(quantityAvailable).toString());
+		quantityText.setText(new Integer(quantityAvailable).toString());
 
-		tPlusButton.setOnClickListener(new View.OnClickListener() {
+		quantityPlusButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
 				InventoryKit.activateProduct(MY_CONSUMABLE, 1);
-				quantityAvailable = InventoryKit.quantityAvailable(MY_CONSUMABLE);
-				tQuantityValue.setText(new Integer(quantityAvailable).toString());
+				quantityAvailable = InventoryKit
+						.quantityAvailable(MY_CONSUMABLE);
+				quantityText.setText(new Integer(quantityAvailable).toString());
 			}
 
 		});
-		
-		tMinusButton.setOnClickListener(new View.OnClickListener() {
-			
+
+		quantityMinusButton.setOnClickListener(new View.OnClickListener() {
+
 			@Override
 			public void onClick(View v) {
 				InventoryKit.consumeQuantity(MY_CONSUMABLE, 1);
-				quantityAvailable = InventoryKit.quantityAvailable(MY_CONSUMABLE);
-				tQuantityValue.setText(new Integer(quantityAvailable).toString());
+				quantityAvailable = InventoryKit
+						.quantityAvailable(MY_CONSUMABLE);
+				quantityText.setText(new Integer(quantityAvailable).toString());
 			}
-			
-		});
-		
-		// product activation components
-		final Button tBuyButton = (Button) findViewById(R.id.buyButton);
-		final CheckBox tCheckBox = (CheckBox) findViewById(R.id.productActivation);
 
-		tBuyButton.setOnClickListener(new View.OnClickListener() {
-			
+		});
+
+		// product activation components
+		this.activateProductButton = (Button) findViewById(R.id.buyButton);
+		this.activationCheckBox = (CheckBox) findViewById(R.id.productActivation);
+
+		activateProductButton.setOnClickListener(new View.OnClickListener() {
+
 			@Override
 			public void onClick(View v) {
-				if( !productActivated ) {
-					AlertDialog.Builder builder = new AlertDialog.Builder(IKActivity.this);
-					builder.setMessage("Are you sure you want to activate the product?")
-							.setCancelable(true)
-							.setPositiveButton("Yes",
-									new DialogInterface.OnClickListener() {
-										public void onClick(DialogInterface dialog, int id) {
-											
-											InventoryKit.activateProduct(MY_NON_CONSUMABLE);
-											productActivated = InventoryKit.productActivated(MY_NON_CONSUMABLE);
-											tCheckBox.setChecked(true);
-											tCheckBox.setText("Purchased");
-											tBuyButton.setEnabled(false);
-											tBuyButton.setVisibility(INVISIBLE);
+				if (!productActivated) {
+					showAlert("Are you sure you want to activate the product?",
+							"OK",
+							// ok
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
 
-										}
-									})
-							.setNegativeButton("Cancel", 
-									new DialogInterface.OnClickListener() {
-										
-										@Override
-										public void onClick(DialogInterface dialog, int id) {
-											
-											tCheckBox.setChecked(false);
-											tCheckBox.setText("Purchased");
-											tBuyButton.setEnabled(true);
-											tBuyButton.setVisibility(VISIBLE);
-											
-										}
-										
-									});
-					AlertDialog alert = builder.create();
-					alert.show();
+									InventoryKit
+											.activateProduct(MY_NON_CONSUMABLE);
+									productActivated = InventoryKit
+											.productActivated(MY_NON_CONSUMABLE);
+									activationCheckBox.setChecked(true);
+									activationCheckBox.setText("Purchased");
+									activateProductButton.setEnabled(false);
+									activateProductButton
+											.setVisibility(INVISIBLE);
+
+								}
+							}, 
+							"Cancel",
+							// cancel
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int id) {
+
+									activationCheckBox.setChecked(false);
+									activationCheckBox.setText("");
+									activateProductButton.setEnabled(true);
+									activateProductButton
+											.setVisibility(VISIBLE);
+
+								}
+
+							});
 				}
 			}
-			
+
 		});
-		
+
+	}
+
+	private final void showAlert(String aMsg,
+			String aOkTitle,
+			DialogInterface.OnClickListener okListener,
+			String aCancelTitle,
+			DialogInterface.OnClickListener cancelListener) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(IKActivity.this);
+		builder.setMessage(aMsg).setCancelable(true)
+				.setPositiveButton(aOkTitle, okListener)
+				.setNegativeButton(aCancelTitle, cancelListener);
+		AlertDialog alert = builder.create();
+		alert.show();
 	}
 
 }
