@@ -14,53 +14,40 @@ import android.util.Log;
 import static android.content.Context.MODE_PRIVATE;
 
 public class InventoryKit {
-	
-	private static final Hashtable<String,Date> sActivatedProducts = new Hashtable<String,Date>();
-	private static final Hashtable<String,Integer> sConsumableProducts = new Hashtable<String,Integer>();
+
+	private static final Hashtable<String, Date> sActivatedProducts = new Hashtable<String, Date>();
+	private static final Hashtable<String, Integer> sConsumableProducts = new Hashtable<String, Integer>();
 	private static SharedPreferences sPreferences;
 	private static ApiClient sClient = null;
 
 	public static final void registerWithPaymentQueue(Activity activity) {
 		loadSettings(activity);
 	}
-	
+
 	public static final void setApiClient(ApiClient client) {
 		sClient = client;
 	}
 	
 	public static final void setCustomerEmail(final String aEmail) {
+		setCustomerEmail(aEmail, new DefaultCustomerListener());
+	}
+
+	public static final void setCustomerEmail(final String aEmail, final CustomerListener aListener) {
 		if( sClient!=null ) {
-			sClient.findOrCreateCustomerByEmail(aEmail, new CustomerListener() {
-
-				@Override
-				public void customerFound(Customer customer) {
-					Log.d("InventoryKit", "Customer found");
-				}
-
-				@Override
-				public void customerCreated(Customer customer) {
-					Log.d("InventoryKit", "Customer created");
-				}
-
-				@Override
-				public void customerError() {
-					Log.e("InventoryKit", "Customer error");
-				}
-				
-			});
+			sClient.findOrCreateCustomerByEmail(aEmail, aListener);
 		}
 	}
-	
+
 	public static final void loadSettings(Activity activity) {
 		Log.d("InventoryKit", "loading preferences");
-		
-		if( sPreferences==null ) {
+
+		if (sPreferences == null) {
 			Log.d("InventoryKit", "assigning preferences pointer");
 			sPreferences = activity.getPreferences(MODE_PRIVATE);
 		}
-		
+
 		String tProductKeys = sPreferences.getString("ActivatedProducts", "");
-		if( tProductKeys.length()>0 ) {
+		if (tProductKeys.length() > 0) {
 			String[] tKeys = tProductKeys.split(",");
 			for (String key : tKeys) {
 				String[] kv = key.split(":");
@@ -68,8 +55,9 @@ public class InventoryKit {
 			}
 		}
 
-		String tConsumableKeys = sPreferences.getString("ConsumableProducts", "");
-		if( tConsumableKeys.length()>0 ) {
+		String tConsumableKeys = sPreferences.getString("ConsumableProducts",
+				"");
+		if (tConsumableKeys.length() > 0) {
 			String[] tKeys = tConsumableKeys.split(",");
 			for (String key : tKeys) {
 				String[] kv = key.split(":");
@@ -77,15 +65,15 @@ public class InventoryKit {
 			}
 		}
 	}
-	
+
 	public static final void saveSettings() {
 		Log.d("InventoryKit", "saving preferences");
-		
+
 		// save activated products
 		StringBuilder tBuilder = new StringBuilder();
-		
+
 		Enumeration<String> tKeys = sActivatedProducts.keys();
-		while( tKeys.hasMoreElements() ) {
+		while (tKeys.hasMoreElements()) {
 			String key = tKeys.nextElement();
 			tBuilder.append(key);
 			tBuilder.append(":");
@@ -94,17 +82,18 @@ public class InventoryKit {
 		}
 		tBuilder.trimToSize();
 		String tString = tBuilder.toString();
-		if( tString==null || tString=="" ) {
+		if (tString == null || tString == "") {
 			sPreferences.edit().remove("ActivatedProducts").commit();
-		}else{
-			sPreferences.edit().putString("ActivatedProducts", tString).commit();
+		} else {
+			sPreferences.edit().putString("ActivatedProducts", tString)
+					.commit();
 		}
-		
+
 		// save consumable products
 		tBuilder = new StringBuilder();
-		
+
 		tKeys = sConsumableProducts.keys();
-		while( tKeys.hasMoreElements() ) {
+		while (tKeys.hasMoreElements()) {
 			String key = tKeys.nextElement();
 			tBuilder.append(key);
 			tBuilder.append(":");
@@ -113,14 +102,15 @@ public class InventoryKit {
 		}
 		tBuilder.trimToSize();
 		tString = tBuilder.toString();
-		if( tString==null || tString=="" ) {
+		if (tString == null || tString == "") {
 			sPreferences.edit().remove("ConsumableProducts").commit();
-		}else{
-			sPreferences.edit().putString("ConsumableProducts", tString).commit();
+		} else {
+			sPreferences.edit().putString("ConsumableProducts", tString)
+					.commit();
 		}
-		
+
 	}
-	
+
 	/**
 	 * Query product activation
 	 * 
@@ -130,9 +120,9 @@ public class InventoryKit {
 	public static final boolean productActivated(String productKey) {
 		Date tNow = new Date();
 		Date tDate = sActivatedProducts.get(productKey);
-		return tNow.compareTo(tDate)>0;
+		return tNow.compareTo(tDate) > 0;
 	}
-	
+
 	/**
 	 * Set product activation (non-consumable)
 	 * 
@@ -142,72 +132,96 @@ public class InventoryKit {
 		sActivatedProducts.put(productKey, null);
 		saveSettings();
 	}
-	
+
 	/**
 	 * Set time-limited product activation (subscription)
 	 * 
 	 * @param productKey
-	 * @param expirationDate last date subscription will be active
+	 * @param expirationDate
+	 *            last date subscription will be active
 	 */
-	public static final void activateProduct(String productKey, Date expirationDate) {
+	public static final void activateProduct(String productKey,
+			Date expirationDate) {
 		sActivatedProducts.put(productKey, expirationDate);
 		saveSettings();
 	}
-	
+
 	/**
 	 * Set product quantity (consumable)
 	 * 
 	 * @param productKey
-	 * @param quantity number of items to add to total
+	 * @param quantity
+	 *            number of items to add to total
 	 */
 	public static final void activateProduct(String productKey, int quantity) {
 		Integer tValue = sConsumableProducts.get(productKey);
-		if( tValue==null ) {
+		if (tValue == null) {
 			sConsumableProducts.put(productKey, new Integer(quantity));
-		}else{
+		} else {
 			int tQuantity = tValue.intValue();
 			tQuantity += quantity;
 			sConsumableProducts.put(productKey, new Integer(tQuantity));
 		}
 		saveSettings();
 	}
-	
+
 	/**
 	 * Query available quantity (consumable)
 	 * 
-	 * @param productKey 
+	 * @param productKey
 	 * @return number of items available
 	 */
 	public static final int quantityAvailable(String productKey) {
 		Integer tValue = sConsumableProducts.get(productKey);
-		if( tValue==null ) {
+		if (tValue == null) {
 			return 0;
-		}else{
+		} else {
 			return tValue.intValue();
 		}
 	}
-	
+
 	/**
 	 * Consume quantity of product items (consumable)
 	 * 
 	 * @param productKey
-	 * @param quantity number of items to consume
-	 * @return true if items successfully consumed, false if fewer than quantity were consumed
+	 * @param quantity
+	 *            number of items to consume
+	 * @return true if items successfully consumed, false if fewer than quantity
+	 *         were consumed
 	 */
 	public static final boolean consumeQuantity(String productKey, int quantity) {
 		Integer tValue = sConsumableProducts.get(productKey);
-		if( tValue==null ) {
+		if (tValue == null) {
 			return false;
-		}else{
+		} else {
 			int tQuantity = tValue.intValue();
 			tQuantity -= quantity;
-			if( tQuantity>0 ) {
+			if (tQuantity > 0) {
 				sConsumableProducts.put(productKey, new Integer(tQuantity));
-			}else{
+			} else {
 				sConsumableProducts.remove(productKey);
 			}
 			return tQuantity >= 0;
 		}
 	}
-	
+
+	public static class DefaultCustomerListener implements CustomerListener {
+
+		@Override
+		public void customerFound(Customer customer) {
+			Log.d("InventoryKit", "Customer found");
+		}
+
+		@Override
+		public void customerCreated(Customer customer) {
+			Log.d("InventoryKit", "Customer created");
+		}
+
+		@Override
+		public void customerError() {
+			Log.e("InventoryKit", "Customer error");
+		}
+
+	}
+
 }

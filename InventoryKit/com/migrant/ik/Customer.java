@@ -4,10 +4,8 @@
  */
 package com.migrant.ik;
 
-import org.codehaus.jackson.annotate.JsonAutoDetect;
-import org.codehaus.jackson.annotate.JsonTypeName;
+import org.codehaus.jackson.annotate.*;
 
-@JsonTypeName( value = "Customer" )
 @JsonAutoDetect
 public class Customer {
 
